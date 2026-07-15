@@ -93,12 +93,13 @@ async def update_asset(
     return AssetOut.model_validate(asset)
 
 
-@router.delete("/{asset_id}", status_code=204)
+@router.delete("/{asset_id}", status_code=200)
 async def delete_asset(
     asset_id: uuid.UUID,
     user: CurrentUser,
     db: Annotated[AsyncSession, Depends(get_db)],
     _: Annotated[None, require_role(UserRole.ORG_ADMIN)] = None,
-) -> None:
+) -> dict:
     service = AssetService(db)
     await service.delete_asset(user.tenant_id, asset_id)
+    return {"deleted": True}
