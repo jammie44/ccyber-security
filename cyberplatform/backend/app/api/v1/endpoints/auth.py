@@ -42,13 +42,14 @@ async def get_me(user: CurrentUser) -> UserOut:
     return UserOut.model_validate(user)
 
 
-@router.post("/change-password", status_code=204)
+@router.post("/change-password", status_code=200)
 async def change_password(
     payload: PasswordChangeRequest,
     user: CurrentUser,
     db: Annotated[AsyncSession, Depends(get_db)],
-) -> None:
+) -> dict:
     await AuthService(db).change_password(user, payload.current_password, payload.new_password)
+    return {"changed": True}
 
 
 @router.post("/mfa/setup", response_model=MFASetupResponse)
@@ -57,10 +58,11 @@ async def setup_mfa(user: CurrentUser, db: Annotated[AsyncSession, Depends(get_d
     return MFASetupResponse(secret=secret, qr_uri=qr_uri, backup_codes=[])
 
 
-@router.post("/mfa/verify", status_code=204)
+@router.post("/mfa/verify", status_code=200)
 async def verify_mfa(
     payload: MFAVerifyRequest,
     user: CurrentUser,
     db: Annotated[AsyncSession, Depends(get_db)],
-) -> None:
+) -> dict:
     await AuthService(db).verify_and_enable_mfa(user, payload.code)
+    return {"verified": True}
