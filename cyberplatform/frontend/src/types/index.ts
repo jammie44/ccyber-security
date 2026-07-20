@@ -19,7 +19,9 @@ export interface Asset {
   os_name?: string
   os_version?: string
   cloud_provider?: string
+  cloud_region?: string
   business_unit?: string
+  department?: string
   owner_email?: string
   security_health_score: number
   open_vuln_critical: number
@@ -28,7 +30,12 @@ export interface Asset {
   open_vuln_low: number
   current_risk_score?: number
   current_risk_band?: RiskBand
+  tags?: Record<string, string>
   notes?: string
+  last_scan_date?: string
+  agent_last_checkin?: string
+  discovery_source?: string
+  fqdn?: string
   created_at: string
   updated_at: string
 }
@@ -53,6 +60,7 @@ export interface AssetVulnerability {
   cvss_v3_score?: number
   epss_score?: number
   is_in_kev?: boolean
+  exploit_maturity?: string
 }
 
 export interface OrgRiskScore {
@@ -76,16 +84,21 @@ export interface Alert {
   message?: string
   severity: AlertSeverity
   status: string
+  fingerprint: string
   asset_id?: string
   asset_name?: string
+  context_data?: Record<string, unknown>
   suppressed_count: number
   triggered_at?: string
   acknowledged_at?: string
+  acknowledged_by?: string
   resolved_at?: string
+  resolved_reason?: string
   created_at: string
 }
 
 export interface PaginatedResponse<T> {
+  data: T[]
   total: number
   page: number
   per_page: number
