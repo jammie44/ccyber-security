@@ -9,6 +9,8 @@ const NAV_ITEMS = [
   { to: '/vulnerabilities', label: 'Vulnerabilities', icon: '🛡️' },
   { to: '/risk', label: 'Risk', icon: '⚠️' },
   { to: '/monitoring', label: 'Alerts', icon: '🔔' },
+  { to: '/simulation', label: 'Simulation', icon: '⚡' },
+  { to: '/intelligence', label: 'Intelligence', icon: '🧠' },
 ]
 
 export function Sidebar() {

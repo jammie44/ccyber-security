@@ -10,6 +10,8 @@ import { AssetDetailPage } from '@/pages/AssetDetailPage'
 import { VulnerabilityListPage } from '@/pages/VulnerabilityListPage'
 import { RiskDashboardPage } from '@/pages/RiskDashboardPage'
 import { AlertListPage } from '@/pages/AlertListPage'
+import { SimulationPage } from '@/pages/SimulationPage'
+import { IntelligencePage } from '@/pages/IntelligencePage'
 
 export default function App() {
   return (
@@ -26,6 +28,8 @@ export default function App() {
           <Route path="/vulnerabilities" element={<VulnerabilityListPage />} />
           <Route path="/risk" element={<RiskDashboardPage />} />
           <Route path="/monitoring" element={<AlertListPage />} />
+          <Route path="/simulation" element={<SimulationPage />} />
+          <Route path="/intelligence" element={<IntelligencePage />} />
         </Route>
       </Route>
 

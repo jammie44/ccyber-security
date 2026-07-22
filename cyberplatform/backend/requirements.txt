@@ -56,3 +56,9 @@ faker==25.0.0
 
 # Network discovery
 python-nmap==0.7.1
+
+# Attack simulation web probing
+# httpx==0.27.0 already present above
+
+# AI Intelligence — Groq (free tier, Llama 3.3 70B)
+groq==0.9.0

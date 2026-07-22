@@ -4,6 +4,8 @@ from app.models.asset import Asset
 from app.models.vulnerability import CVERecord, AssetVulnerability
 from app.models.risk import AssetRiskScore, OrgRiskScore, RiskWeightConfig
 from app.models.alert import AlertRule, Alert
+from app.models.attack_simulation_result import AttackSimulationResult
+from app.models.intelligence import AssetRiskPrediction, SecurityPostureSnapshot
 
 __all__ = [
     "Tenant",
@@ -16,4 +18,7 @@ __all__ = [
     "RiskWeightConfig",
     "AlertRule",
     "Alert",
+    "AttackSimulationResult",
+    "AssetRiskPrediction",
+    "SecurityPostureSnapshot",
 ]
