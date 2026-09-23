@@ -12,6 +12,8 @@ import { RiskDashboardPage } from '@/pages/RiskDashboardPage'
 import { AlertListPage } from '@/pages/AlertListPage'
 import { SimulationPage } from '@/pages/SimulationPage'
 import { IntelligencePage } from '@/pages/IntelligencePage'
+import { NetworkPage } from '@/pages/NetworkPage'
+import { ReportsPage } from '@/pages/ReportsPage'
 
 export default function App() {
   return (
@@ -30,6 +32,8 @@ export default function App() {
           <Route path="/monitoring" element={<AlertListPage />} />
           <Route path="/simulation" element={<SimulationPage />} />
           <Route path="/intelligence" element={<IntelligencePage />} />
+          <Route path="/network" element={<NetworkPage />} />
+          <Route path="/reports" element={<ReportsPage />} />
         </Route>
       </Route>
 

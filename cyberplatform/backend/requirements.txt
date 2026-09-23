@@ -62,3 +62,6 @@ python-nmap==0.7.1
 
 # AI Intelligence — Groq (free tier, Llama 3.3 70B)
 groq==0.9.0
+
+# Reporting — PDF generation
+reportlab==4.2.5

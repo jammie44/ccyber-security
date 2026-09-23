@@ -10,6 +10,7 @@ from fastapi.responses import JSONResponse
 from app.api.v1.router import api_router
 from app.core.config import settings
 from app.core.logging import logger, setup_logging
+from app.db.base import AsyncSessionLocal
 from app.db.redis_client import close_redis
 
 
@@ -21,7 +22,6 @@ def start_scheduler():
 
         scheduler = BackgroundScheduler()
 
-        # Refresh SLA statuses every 15 minutes
         def refresh_sla():
             try:
                 from app.db.sync_session import SyncSessionLocal
@@ -32,7 +32,7 @@ def start_scheduler():
                 db = SyncSessionLocal()
                 OPEN_STATUSES = [
                     "discovered", "triaged", "assigned",
-                    "in_remediation", "pending_verification"
+                    "in_remediation", "pending_verification",
                 ]
                 now = datetime.now(timezone.utc)
                 findings = db.execute(
@@ -62,7 +62,6 @@ def start_scheduler():
             except Exception as e:
                 logger.error("sla_refresh_failed", error=str(e))
 
-        # Recompute org risk scores every hour
         def recompute_org_risk():
             try:
                 from app.db.sync_session import SyncSessionLocal
@@ -123,6 +122,59 @@ def start_scheduler():
             replace_existing=True,
         )
 
+        # Weekly email digest — every Monday at 08:00 UTC
+        # Note: APScheduler uses server local time (UTC on Render).
+        # If your customers are in a different timezone, adjust hour accordingly.
+        async def run_weekly_digest():
+            import os
+            dashboard_url = os.environ.get(
+                "PLATFORM_DASHBOARD_URL",
+                "https://cyberplatform-web.onrender.com/dashboard",
+            )
+            try:
+                from app.db.base import AsyncSessionLocal
+                from app.models.tenant import Tenant
+                from app.services.report_service import send_weekly_digest
+                from sqlalchemy import select
+
+                async with AsyncSessionLocal() as db:
+                    try:
+                        tenants = (await db.execute(
+                            select(Tenant.id, Tenant.name).where(Tenant.is_active == True)  # noqa: E712
+                        )).all()
+                    except Exception:
+                        logger.exception("Weekly digest: failed to fetch tenants")
+                        return
+
+                for tenant_id, tenant_name in tenants:
+                    async with AsyncSessionLocal() as db:
+                        try:
+                            result = await send_weekly_digest(db, tenant_id, tenant_name or str(tenant_id), dashboard_url)
+                            logger.info("Weekly digest tenant %s: %s", tenant_id, result)
+                        except Exception:
+                            logger.exception("Weekly digest failed for tenant %s", tenant_id)
+            except Exception:
+                logger.exception("Weekly digest job failed entirely")
+
+        import asyncio as _asyncio
+
+        def _weekly_digest_sync():
+            """Sync wrapper so APScheduler BackgroundScheduler can call async code."""
+            try:
+                loop = _asyncio.get_event_loop()
+            except RuntimeError:
+                loop = _asyncio.new_event_loop()
+                _asyncio.set_event_loop(loop)
+            loop.run_until_complete(run_weekly_digest())
+
+        from apscheduler.triggers.cron import CronTrigger
+        scheduler.add_job(
+            _weekly_digest_sync,
+            trigger=CronTrigger(day_of_week="mon", hour=8, minute=0),
+            id="weekly_security_digest",
+            replace_existing=True,
+        )
+
         scheduler.start()
         atexit.register(lambda: scheduler.shutdown())
         logger.info("scheduler_started")
@@ -151,6 +203,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
@@ -158,6 +211,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Access Audit Logger (best-effort — never blocks requests)
+try:
+    from app.middleware.access_logger import AccessLoggerMiddleware
+    app.add_middleware(AccessLoggerMiddleware, session_factory=AsyncSessionLocal)
+    logger.info("access_logger_middleware_registered")
+except Exception as _exc:
+    logger.warning("access_logger_middleware_skipped", error=str(_exc))
 
 
 @app.exception_handler(RequestValidationError)

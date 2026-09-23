@@ -11,6 +11,8 @@ const NAV_ITEMS = [
   { to: '/monitoring', label: 'Alerts', icon: '🔔' },
   { to: '/simulation', label: 'Simulation', icon: '⚡' },
   { to: '/intelligence', label: 'Intelligence', icon: '🧠' },
+  { to: '/network', label: 'Network', icon: '📡' },
+  { to: '/reports', label: 'Reports', icon: '📄' },
 ]
 
 export function Sidebar() {
