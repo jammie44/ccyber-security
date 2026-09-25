@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     ENABLE_AI_FEATURES: bool = False
     ENABLE_KAFKA: bool = False
     ENABLE_ELASTICSEARCH: bool = False
+    DEBUG: bool = False
 
     ANTHROPIC_API_KEY: Optional[str] = None
     GROQ_API_KEY: Optional[str] = None
